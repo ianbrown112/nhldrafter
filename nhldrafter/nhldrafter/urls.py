@@ -13,9 +13,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+from django.conf.urls import url, include
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import TemplateView
+
+from teams.views import TeamListView, TeamDetailView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^teams/$', TeamListView.as_view(), name="team-list"),
+    url(r'^teams/(?P<slug>[\w-]+)/$', TeamDetailView.as_view(), name="team-detail"),
+    url(r'$', TemplateView.as_view(template_name="homepage.html"), name="homepage"),
+
 ]
