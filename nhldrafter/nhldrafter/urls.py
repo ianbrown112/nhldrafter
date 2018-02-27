@@ -19,12 +19,17 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 
+from drafter.views import DraftView
 from teams.views import TeamListView, TeamDetailView
+from squads.views import SquadListView, SquadDetailView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^leagues/(?P<slug>[\w-]+)/drafter/$', DraftView.as_view(), name="drafter"),
     url(r'^teams/$', TeamListView.as_view(), name="team-list"),
     url(r'^teams/(?P<slug>[\w-]+)/$', TeamDetailView.as_view(), name="team-detail"),
+    url(r'^squads/$', SquadListView.as_view(), name="squad-list"),
+    url(r'^squads/(?P<slug>[\w-]+)/$', SquadDetailView.as_view(), name="squad-detail"),
     url(r'$', TemplateView.as_view(template_name="homepage.html"), name="homepage"),
 
 ]

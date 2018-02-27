@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Live Drafter</h1>
+<!--<h1>League: {{ league.name }}</h1>-->
+<h2>Squads</h2>
+<ol>
+{% for squad in squads %}
+	<li><strong>{{ squad }}</strong></li>
+	<ul>
+	{% for player in squad.players.all %}
+		<li>{{ player }}, {{ player.team.shortform }}, {{ player.points }}</li>
+	{% endfor %}
+	</ul>
+{% endfor %}
+</ol>
+<h1>Available players</h1>
+<form method="POST"> {% csrf_token %}
+	<div class="form-group">	
+	{{ form.as_p }}
+	<button type="submit">Draft</button>
+	</div>
+</form>
+<hr>
+{% endblock %}
