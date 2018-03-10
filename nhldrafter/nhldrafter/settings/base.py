@@ -38,8 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'drafter',
+    'bootstrap3',
     'leagues',
     'players',
+    'profiles',
     'squads',
     'teams',
 

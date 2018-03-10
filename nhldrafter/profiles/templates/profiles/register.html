@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load bootstrap3 %}
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+<div class="col-sm-6 col-sm-offset-3 text-centre">
+<form method="post" action="{% url 'user_register' %}">
+{% csrf_token %}
+{% bootstrap_form form %}
+<input type="submit" value="Register" />
+<input type="hidden" name="next" value="{{ next }}" />
+</form>
+<p>Did you need to <a href="{% url 'login' %}">login?</a></p>
+</div>
+{% endblock %}

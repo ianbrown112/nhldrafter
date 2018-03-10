@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Live Drafter</h1>
-<!--<h1>League: {{ league.name }}</h1>-->
+<h1>League: {{ league.name }}</h1>
 <h2>Squads</h2>
 <ol>
 {% for squad in squads %}
@@ -17,9 +17,24 @@
 <h1>Available players</h1>
 <form method="POST"> {% csrf_token %}
 	<div class="form-group">	
-	{{ form.as_p }}
-	<button type="submit">Draft</button>
-	</div>
+	{{ player_form.as_p }}
+	<button type="submit" name="draft" class='btn btn-success'>Draft</button>
+	<div>
 </form>
+<br>
+<h3>Filter</h3>
+
+<form method="POST"> {% csrf_token %}
+	<button type="submit" name="f_filter" class='btn btn-primary'>Forwards</button>
+	<button type="submit" name="d_filter" class='btn btn-primary'>Defence</button>
+	<button type="submit" name="g_filter" class='btn btn-primary'>Goaltenders</button>
+</form>
+
 <hr>
+<form method="POST"> {% csrf_token %}
+	<div class="form-group">	
+	{{ team_form.as_p }}
+	<button type="submit" name="team_filter" class="btn btn-success" value="team_filter">Select Team</button>
+	<div>
+</form>
 {% endblock %}

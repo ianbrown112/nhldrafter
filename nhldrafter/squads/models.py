@@ -14,6 +14,7 @@ class Squad(models.Model):
 	league		= models.ForeignKey(League, on_delete=models.CASCADE)
 	players		= models.ManyToManyField(Player, related_name="on_squad", blank=True)
 	name		= models.CharField(max_length=120)
+	draft_order	= models.IntegerField(default=0)
 
 	slug		= models.SlugField(default=name)
 

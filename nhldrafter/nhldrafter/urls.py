@@ -19,13 +19,20 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic import TemplateView
 
-from drafter.views import DraftView
+from drafter.views import DraftView, draft_view_filtered
 from teams.views import TeamListView, TeamDetailView
 from squads.views import SquadListView, SquadDetailView
+from profiles.views import UserRegisterView, logout_view, login_view
+from leagues.views import LeagueCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'^register/$', UserRegisterView.as_view(), name="user_register"),
+    url(r'^login/$', login_view, name="login"),
+    url(r'^logout/$', logout_view, name="logout"),
+    url(r'^leagues/create/$', LeagueCreateView.as_view(), name="create_league"),
     url(r'^leagues/(?P<slug>[\w-]+)/drafter/$', DraftView.as_view(), name="drafter"),
+    url(r'^leagues/(?P<slug>[\w-]+)/drafter/(?P<position>[\w-]+)/$', draft_view_filtered, name="drafter_filter"),
     url(r'^teams/$', TeamListView.as_view(), name="team-list"),
     url(r'^teams/(?P<slug>[\w-]+)/$', TeamDetailView.as_view(), name="team-detail"),
     url(r'^squads/$', SquadListView.as_view(), name="squad-list"),
