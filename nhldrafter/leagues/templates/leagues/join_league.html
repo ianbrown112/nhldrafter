@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ league }}</h1>
+<form method="POST"> {% csrf_token %}
+	<div class="form-group">
+		{{ form.as_p }}
+		<button>Join</button>
+	</div>
+</form>
+{% endblock %}
