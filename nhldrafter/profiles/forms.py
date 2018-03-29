@@ -37,6 +37,7 @@ class RegisterForm(forms.ModelForm):
 		#create a new user hash for activating email
 
 		if commit:
+			user.is_active = True
 			user.save()
 
 		return user

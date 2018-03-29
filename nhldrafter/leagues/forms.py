@@ -7,4 +7,4 @@ class LeagueCreateForm(forms.ModelForm):
 	
 	class Meta:
 		model 	= League
-		fields 	= ['name', 'password', 'skater_amount', 'goalie_amount']
+		fields 	= ['name', 'password', 'owner_amount', 'skater_amount', 'goalie_amount', 'draft_goalies']

@@ -22,7 +22,7 @@ def make_team_tuple(queryset):
 		result.append(team_tuple)
 	return result
 
-players 		= Player.objects.all().order_by('-points')
+players 		= Player.objects.all().order_by('-points').exclude(name="Phil Kessel")
 player_options 	= make_player_tuple(players)
 
 teams 			= Team.objects.all()
@@ -36,11 +36,15 @@ class PlayerForm(forms.Form):
 	class Meta:
 		ordering = ['points']
 
-	def __init__(self, *args, **kwargs):
-		super(PlayerForm, self).__init__(*args, **kwargs)
+	def __init__(self, squads, *args, **kwargs):
+		form = super(PlayerForm, self).__init__(*args, **kwargs)
 		self.fields['name'].label 				= ''
-		self.fields['name'].queryset 			= Player.objects.all().order_by('-points')
+		#self.fields['name'].queryset 			= Player.objects.exclude(name="Connor McDavid").order_by('-points')
+		queryset 								= Player.objects.exclude(on_squad__in=squads).order_by('-points')
+		options 								= make_player_tuple(queryset)
+		self.fields['name']						= forms.ChoiceField(choices=options)
 		self.fields['name'].label_from_instance = lambda obj: "%s" % obj.name + ", " + str(obj.points) + ", " + obj.team.shortform
+		return form
 
 	def filter_by_position(self, *args, **kwargs):
 		form = super(PlayerForm, self)
@@ -68,6 +72,16 @@ class PlayerForm(forms.Form):
 			self.fields['name'].label_from_instance = lambda obj: "%s" % obj.name + ", " + obj.wins + " wins, " + str(obj.save_percentage) + ", " + obj.team.shortform
 			print("goalie")
 			return form	
+
+	def filter_by_team(self, *args, **kwargs):
+		form 						= super(PlayerForm, self)
+		queryset	 				= Player.objects.filter(team__shortform=args[0]).order_by('-points')
+		options 					= make_player_tuple(queryset)
+		self.fields['name'] 		= forms.ChoiceField(choices=options)
+		self.fields['name'].label 	= ''
+		print("team")
+		return form
+
 
 class TeamForm(forms.Form):
 	options = team_options

@@ -14,6 +14,7 @@ class UserRegisterView(CreateView):
 
 	def dispatch(self, *args, **kwargs):
 		if self.request.user.is_authenticated:
+			self.request.user.is_active = True
 			return redirect('/logout')
 		return super(UserRegisterView, self).dispatch(*args, **kwargs)
 

@@ -2,11 +2,12 @@
 
 {% block content %}
 <h1>Live Drafter</h1>
-<h1>League: {{ league.name }}</h1>
-<h2>Squads</h2>
+<br>
+<h2><strong>{{ league.name }}</strong></h2>
+<h3>Squads</h3>
 <ol>
 {% for squad in squads %}
-	<li><strong>{{ squad }}</strong></li>
+	<li><strong>{{ squad }}</strong> | {{ squad.owner }}</li>
 	<ul>
 	{% for player in squad.players.all %}
 		<li>{{ player }}, {{ player.team.shortform }}, {{ player.points }}</li>
@@ -14,13 +15,18 @@
 	</ul>
 {% endfor %}
 </ol>
-<h1>Available players</h1>
-<form method="POST"> {% csrf_token %}
-	<div class="form-group">	
-	{{ player_form.as_p }}
-	<button type="submit" name="draft" class='btn btn-success'>Draft</button>
-	<div>
-</form>
+{% if league.is_active and drafter.is_active %}
+<h3>Current Pick</h3>
+<p>{{ drafter.overall_pick }} of {{ drafter.total_picks }} | Round: {{ drafter.current_round }} | {{ squad_picking.owner }} </p>
+<p>draft turn: {{ drafter.draft_turn }}</p>
+<h3>Available players</h3>
+	<form method="POST"> {% csrf_token %}
+		<div class="form-group">	
+		{{ player_form.as_p }}
+		<button type="submit" name="draft" class='btn btn-success'>Draft</button>
+		<div>
+	</form>
+
 <br>
 <h3>Filter</h3>
 
@@ -34,7 +40,17 @@
 <form method="POST"> {% csrf_token %}
 	<div class="form-group">	
 	{{ team_form.as_p }}
-	<button type="submit" name="team_filter" class="btn btn-success" value="team_filter">Select Team</button>
+	<button type="submit" name="team_filter" class="btn btn-success">Select Team</button>
 	<div>
 </form>
+{% elif not league.is_active %}
+<p>The commissioner has not activated this league yet!</p>
+	{% if request.user == league.admin %}
+	<form method="POST">{% csrf_token %}
+		<button type="submit" name="activate_league" class='btn btn-primary'>Activate League</button>
+	</form>
+	{% endif %}
+{% else %}
+<p>Draft is complete! Good luck.</p>
+{% endif %}
 {% endblock %}

@@ -9,6 +9,7 @@ from teams.models import Team
 from drafter.models import Drafter
 
 from .forms import PlayerForm, TeamForm
+from .utils import randomize_draft_order
 
 # class DraftView(UpdateView):
 # 	form_class = PlayerForm
@@ -47,7 +48,6 @@ from .forms import PlayerForm, TeamForm
 
 class DraftView(UpdateView):
 	
-	player_form = PlayerForm()
 	team_form = TeamForm
 
 	def get_context_data(self, *args, **kwargs):
@@ -66,15 +66,16 @@ class DraftView(UpdateView):
 	
 	def post(self, request, *args, **kwargs):
 		team_form = TeamForm
-		player_form = PlayerForm()
 		league = self.get_queryset().first()
 		squads = Squad.objects.filter(league=league)
+		player_form = PlayerForm(squads=squads)
 		drafter = Drafter.objects.filter(league=league)[0]
 		
 		if 'team_filter' in request.POST:	
 			print('team_filter')
 			team = Team.objects.filter(name=request.POST['name']).first()
-			player_form = player_form.filter_by_position(team.shortform)
+			print(team)
+			player_form = player_form.filter_by_team(team.shortform)
 			return render(request, 'drafter/draft.html', {	'team_form':team_form, 
 															'player_form':player_form, 
 															'league':league, 
@@ -106,17 +107,70 @@ class DraftView(UpdateView):
 														)
 		
 		elif 'draft' in request.POST:
-			draft_turn = drafter.draft_turn
-			squad 	= Squad.objects.filter(owner=self.request.user).first()
-			if draft_turn == squad.draft_order:
-				drafter.increase_draft_turn()
+			squad = Squad.objects.filter(owner=self.request.user, league=league).first()
+			print(squad.owner)
+			print(squad.draft_order)
+			print(drafter.draft_turn)
+			
+			if drafter.is_active:
+
+				if drafter.is_even_round() == False:
+					if drafter.draft_turn == squad.draft_order:
+						drafter.increase_overall_pick()
+						player = Player.objects.filter(name=request.POST.get('name')).first()
+						squad.players.add(player)
+						squad.save()
+						#instance.save()
+						if drafter.draft_turn == drafter.turns_per_round:
+							drafter.increase_round()
+						else:
+							drafter.increase_draft_turn()
+						
+						if drafter.overall_pick == drafter.total_picks + 1:
+							drafter.deactivate()
+
+						drafter.save()
+					
+						return redirect('/leagues/%s/drafter/' % league.slug)
+				
+				elif drafter.is_even_round() == True:
+					if drafter.draft_turn == squad.draft_order:
+						drafter.increase_overall_pick()
+						player = Player.objects.filter(name=request.POST.get('name')).first()
+						squad.players.add(player)
+						squad.save()
+						#instance.save()
+						if drafter.draft_turn == 1:
+							drafter.increase_round()
+						else:
+							drafter.decrease_draft_turn()
+						
+						if drafter.overall_pick == drafter.total_picks + 1:
+							drafter.deactivate()
+
+						drafter.save()
+						return redirect('/leagues/%s/drafter/' % league.slug)
+
+			else:
+				drafter.deactivate()
 				drafter.save()
-				league 	= self.get_queryset().first()
-				player = Player.objects.filter(name=request.POST.get('name')).first()
-				squad.players.add(player)
-				squad.save()
-				#instance.save()
 				return redirect('/leagues/%s/drafter/' % league.slug)
+
+		elif 'activate_league' in request.POST:
+			number_of_squads 		= squads.count()
+			drafter.turns_per_round = number_of_squads
+			if league.draft_goalies == True:
+				total_rounds = league.skater_amount + league.goalie_amount
+			else:
+				total_rounds = league.skater_amount
+			drafter.total_rounds = total_rounds
+			drafter.total_picks  = total_rounds * number_of_squads
+			randomize_draft_order(squads, number_of_squads)
+			drafter.activate()
+			league.activate()
+			drafter.save()
+			league.save()
+			return redirect('/leagues/%s/drafter/' % league.slug)
 
 		return redirect('/leagues/%s/drafter/' % league.slug)
 		# else:
@@ -124,12 +178,26 @@ class DraftView(UpdateView):
 		# 	squad = Squad.objects.filter(owner=self.request.user).first()
 
 	def get(self, request, *args, **kwargs):
-		league = self.get_queryset().first()
-		squads = Squad.objects.filter(league=league)
-		player_form = PlayerForm()
-		team_form = TeamForm
-		return render(request, 'drafter/draft.html', {'team_form':team_form, 'player_form':player_form, 'league':league, 'squads':squads })
-
+		league 			= self.get_queryset().first()
+		squads 			= Squad.objects.filter(league=league)
+		drafter 		= Drafter.objects.filter(league=league).first()
+		player_form 	= PlayerForm(squads=squads)
+		team_form 		= TeamForm
+		squad_picking	= None
+		if league.is_active:
+			squad_picking = Squad.objects.filter(draft_order=drafter.draft_turn, league=league).first()
+			print(drafter.draft_turn)
+			print(squad_picking)
+		return render(request, 
+						'drafter/draft.html', 
+						{'team_form':team_form, 
+						 'player_form':player_form, 
+						 'league':league, 
+						 'squads':squads,
+						 'drafter':drafter, 
+						 'squad_picking':squad_picking,
+						}
+					)
 def draft_view_filtered(request, slug, *args, **kwargs):
 	
 	position = kwargs.get('position')

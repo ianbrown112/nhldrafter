@@ -23,7 +23,7 @@ from drafter.views import DraftView, draft_view_filtered
 from teams.views import TeamListView, TeamDetailView
 from squads.views import SquadListView, SquadDetailView
 from profiles.views import UserRegisterView, logout_view, login_view
-from leagues.views import LeagueCreateView
+from leagues.views import LeagueCreateView, league_join_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^login/$', login_view, name="login"),
     url(r'^logout/$', logout_view, name="logout"),
     url(r'^leagues/create/$', LeagueCreateView.as_view(), name="create_league"),
+    url(r'^leagues/(?P<slug>[\w-]+)/join/$', league_join_view, name="join_league"),
     url(r'^leagues/(?P<slug>[\w-]+)/drafter/$', DraftView.as_view(), name="drafter"),
     url(r'^leagues/(?P<slug>[\w-]+)/drafter/(?P<position>[\w-]+)/$', draft_view_filtered, name="drafter_filter"),
     url(r'^teams/$', TeamListView.as_view(), name="team-list"),

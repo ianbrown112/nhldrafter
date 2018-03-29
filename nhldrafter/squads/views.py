@@ -26,3 +26,4 @@ class SquadDetailView(DetailView):
 		context['players'] = players
 		print(context)
 		return context
+
